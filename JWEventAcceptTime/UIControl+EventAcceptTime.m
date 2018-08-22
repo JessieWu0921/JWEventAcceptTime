@@ -10,6 +10,11 @@
 #import <objc/runtime.h>
 
 static const char *UIControl_EventAcceptInterval = "UIControl_EventAcceptInterval";
+
+@interface UIControl()
+@property (nonatomic, assign) NSTimeInterval jw_acceptEventTime;
+@end
+
 @implementation UIControl (EventAcceptTime)
 
 + (void)load {
@@ -30,13 +35,26 @@ static const char *UIControl_EventAcceptInterval = "UIControl_EventAcceptInterva
     objc_setAssociatedObject(self, UIControl_EventAcceptInterval, @(jw_acceptEventTimeInterval), OBJC_ASSOCIATION_ASSIGN);
 }
 
+static const char *UIControl_acceptEventTime = "UIControl_acceptEventTime";
+
+- (NSTimeInterval)jw_acceptEventTime {
+    return  [objc_getAssociatedObject(self, UIControl_acceptEventTime) doubleValue];
+}
+
+- (void)setJw_acceptEventTime:(NSTimeInterval)jw_acceptEventTime {
+    objc_setAssociatedObject(self, UIControl_acceptEventTime, @(jw_acceptEventTime), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
 - (void)jw_sendAction:(SEL)selector to:(id)target forEvent:(UIEvent *)event {
-    static NSTimeInterval eventTime = 0.0f;
-    if (NSDate.date.timeIntervalSince1970 - eventTime < self.jw_acceptEventTimeInterval) return;
-        
+    if (NSDate.date.timeIntervalSince1970 - self.jw_acceptEventTime < self.jw_acceptEventTimeInterval) {
+        return;
+    }
+    
+    if (self.jw_acceptEventTimeInterval > 0) {
+        self.jw_acceptEventTime = NSDate.date.timeIntervalSince1970;
+    }
     [self jw_sendAction:selector to:target forEvent:event];
     
-    eventTime = NSDate.date.timeIntervalSince1970;
 }
 
 @end

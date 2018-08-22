@@ -12,4 +12,5 @@
 
 @property (nonatomic, assign) NSTimeInterval jw_acceptEventTimeInterval;
 
+
 @end
